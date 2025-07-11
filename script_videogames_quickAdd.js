@@ -71,25 +71,28 @@ async function start(params, settings) {
 
   let developer = selectedGame.involved_companies?.find(el => el.developer);
 
+  const today = new Date().toISOString().split("T")[0]; 
+
   QuickAdd.variables = {
-    ...selectedGame,
-    fileName: replaceIllegalFileNameCharactersInString(selectedGame.name),
-    titleSanitized: replaceIllegalFileNameCharactersInString(selectedGame.name),
-    genresFormatted: Array.isArray(selectedGame.genres) ? formatList(selectedGame.genres.map(item => item.name)) : "N/A",
-    developerName: developer?.company?.name || "N/A",
-    developerLogo: developer?.company?.logo?.url ? ("https:" + developer.company.logo.url).replace("thumb", "logo_med") : " ",
-    thumbnail: selectedGame.cover?.url ? "https:" + selectedGame.cover.url.replace("thumb", "cover_big") : " ",
-    release: selectedGame.first_release_date ? new Date(selectedGame.first_release_date * 1000).getFullYear() : "N/A",
-    storylineFormatted: selectedGame.storyline?.trim()
-      ? `"${truncateText(selectedGame.storyline.replace(/["\r\n]+/g, " "), 300).replace(/"/g, '\\"')}"`
-      : selectedGame.summary?.trim()
-        ? `"${truncateText(selectedGame.summary.replace(/["\r\n]+/g, " "), 300).replace(/"/g, '\\"')}"`
-        : "Plot not available.",
-    rating: safeValue(selectedGame.rating != null ? Math.round(selectedGame.rating) : null),
-    platformsFormatted: Array.isArray(selectedGame.platforms)
-      ? selectedGame.platforms.map(p => p.name.trim()).join(", ")
-      : "N/A",
-  };
+  ...selectedGame,
+  fileName: replaceIllegalFileNameCharactersInString(selectedGame.name),
+  titleSanitized: replaceIllegalFileNameCharactersInString(selectedGame.name),
+  genresFormatted: Array.isArray(selectedGame.genres) ? formatList(selectedGame.genres.map(item => item.name)) : "N/A",
+  developerName: developer?.company?.name || "N/A",
+  developerLogo: developer?.company?.logo?.url ? ("https:" + developer.company.logo.url).replace("thumb", "logo_med") : " ",
+  thumbnail: selectedGame.cover?.url ? "https:" + selectedGame.cover.url.replace("thumb", "cover_big") : " ",
+  release: selectedGame.first_release_date ? new Date(selectedGame.first_release_date * 1000).getFullYear() : "N/A",
+  storylineFormatted: selectedGame.storyline?.trim()
+    ? `"${truncateText(selectedGame.storyline.replace(/["\r\n]+/g, " "), 300).replace(/"/g, '\\"')}"`
+    : selectedGame.summary?.trim()
+      ? `"${truncateText(selectedGame.summary.replace(/["\r\n]+/g, " "), 300).replace(/"/g, '\\"')}"`
+      : "Plot not available.",
+  rating: safeValue(selectedGame.rating != null ? Math.round(selectedGame.rating) : null),
+  platformsFormatted: Array.isArray(selectedGame.platforms)
+    ? selectedGame.platforms.map(p => p.name.trim()).join(", ")
+    : "N/A",
+  dateAdded: today
+};
 }
 
 function extractSlugFromUrl(url) {
@@ -212,10 +215,6 @@ async function apiGet(igdbQuery) {
           'Client-ID': Settings[API_CLIENT_ID_OPTION],
           'Authorization': "Bearer " + AUTH_TOKEN
         },
-			// The understand syntax of request to IGDB API, read the following :
-			// https://api-docs.igdb.com/#examples
-			// https://api-docs.igdb.com/#game
-			// https://api-docs.igdb.com/#expander
         body: `fields name, slug, first_release_date, involved_companies.developer, involved_companies.company.name, involved_companies.company.logo.url, url, cover.url, genres.name, game_modes.name, storyline, summary, rating, platforms.name; ${igdbQuery}`
       });
 
